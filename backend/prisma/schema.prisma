@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  twitchUrl String?
+  logo      String?   @db.Text
+  createdAt DateTime  @default(now())
+  plannings Planning[]
+}
+
+model Planning {
+  id        Int      @id @default(autoincrement())
+  title     String   @default("Planning de stream")
+  startDate DateTime
+  endDate   DateTime
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events    Event[]
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  gameName    String
+  gameImage   String   @db.Text
+  streamTitle String?
+  dayOfWeek   Int
+  startTime   String
+  endTime     String
+  planningId  Int
+  planning    Planning @relation(fields: [planningId], references: [id], onDelete: Cascade)
+}
