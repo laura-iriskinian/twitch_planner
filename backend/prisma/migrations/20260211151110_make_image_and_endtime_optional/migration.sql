@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "gameImage" DROP NOT NULL,
+ALTER COLUMN "endTime" DROP NOT NULL;

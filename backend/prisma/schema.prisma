@@ -31,11 +31,11 @@ model Planning {
 model Event {
   id          Int      @id @default(autoincrement())
   gameName    String
-  gameImage   String   @db.Text
+  gameImage   String?  @db.Text
   streamTitle String?
   dayOfWeek   Int
   startTime   String
-  endTime     String
+  endTime     String?
   planningId  Int
   planning    Planning @relation(fields: [planningId], references: [id], onDelete: Cascade)
 }
