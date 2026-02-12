@@ -1,0 +1,354 @@
+# TwitchPlanner
+
+Application web permettant aux streamers de créer et gérer leurs plannings de stream avec export en image PNG.
+
+## 📋 Prérequis
+
+Avant de commencer, assurez-vous d'avoir installé :
+
+- [Node.js](https://nodejs.org/) (version 18 ou supérieure)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) (pour PostgreSQL)
+- [Git](https://git-scm.com/)
+
+## 🚀 Installation
+
+### 1. Cloner le projet
+
+```bash
+git clone <URL_DU_REPO>
+cd twitch_planner
+```
+
+### 2. Configuration de la base de données (PostgreSQL avec Docker)
+
+#### Créer le fichier .env pour Docker
+
+À la **racine du projet** (là où se trouve `docker-compose.yml`), créez un fichier `.env` :
+
+```bash
+# À la racine du projet (pas dans backend/)
+cp .env.example .env
+```
+
+Puis éditez le fichier `.env` et **changez le mot de passe** :
+
+```env
+# Base de données PostgreSQL
+DB_PASSWORD=VOTRE_MOT_DE_PASSE_SECURISE
+
+# Backend (à copier aussi dans backend/.env)
+DATABASE_URL="postgresql://postgres:VOTRE_MOT_DE_PASSE_SECURISE@localhost:5433/twitchplanner"
+JWT_SECRET="GENERER_UNE_CLE_ALEATOIRE_32_CARACTERES"
+PORT=5000
+NODE_ENV=development
+```
+
+**💡 Générer un JWT_SECRET sécurisé :**
+
+```bash
+# Sur Linux/Mac
+openssl rand -base64 32
+
+# Sur Windows PowerShell
+-join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | % {[char]$_})
+```
+
+#### Démarrer PostgreSQL avec Docker Compose
+
+```bash
+# À la racine du projet
+docker-compose up -d
+```
+
+**Vérifier que la base de données fonctionne :**
+
+```bash
+docker-compose ps
+```
+
+Vous devriez voir :
+```
+NAME              IMAGE         STATUS
+twitch-postgres   postgres:15   Up About a minute (healthy)
+```
+
+#### Commandes Docker Compose utiles
+
+```bash
+# Démarrer
+docker-compose up -d
+
+# Arrêter
+docker-compose down
+
+# Voir les logs
+docker-compose logs postgres
+
+# Arrêter et SUPPRIMER les données
+docker-compose down -v
+```
+
+### 3. Configuration du Backend
+
+#### Aller dans le dossier backend
+
+```bash
+cd backend
+```
+
+#### Installer les dépendances
+
+```bash
+npm install
+```
+
+#### Créer le fichier .env du backend
+
+Copiez le fichier `.env` de la racine vers le dossier `backend` :
+
+```bash
+# Depuis le dossier backend/
+cp ../.env .env
+```
+
+Ou créez-le manuellement avec le même contenu que celui de la racine :
+
+```env
+DATABASE_URL="postgresql://postgres:VOTRE_MOT_DE_PASSE_SECURISE@localhost:5433/twitchplanner"
+JWT_SECRET="VOTRE_CLE_JWT_SECURISEE"
+PORT=5000
+NODE_ENV=development
+```
+
+**⚠️ IMPORTANT - Sécurité :**
+- Utilisez le **même mot de passe** que dans le `.env` de la racine
+- Le fichier `.env` est déjà dans `.gitignore` - ne le commitez jamais !
+
+#### Initialiser la base de données avec Prisma
+
+```bash
+# Générer le client Prisma
+npx prisma generate
+
+# Créer les tables dans la base de données
+npx prisma db push
+```
+
+#### Démarrer le serveur backend
+
+```bash
+npm run dev
+```
+
+Le serveur backend devrait démarrer sur `http://localhost:5000`
+
+Vous devriez voir :
+```
+Server running on http://localhost:5000
+```
+
+### 4. Configuration du Frontend
+
+#### Ouvrir un NOUVEAU terminal et aller dans le dossier frontend
+
+```bash
+cd frontend
+```
+
+#### Installer les dépendances
+
+```bash
+npm install
+```
+
+#### Démarrer le serveur frontend
+
+```bash
+npm run dev
+```
+
+Le serveur frontend devrait démarrer sur `http://localhost:5173`
+
+Vous devriez voir :
+```
+  VITE v5.x.x  ready in xxx ms
+
+  ➜  Local:   http://localhost:5173/
+```
+
+## 🎯 Utilisation
+
+1. Ouvrez votre navigateur et allez sur `http://localhost:5173`
+2. Créez un compte
+3. Connectez-vous
+4. Créez votre premier planning
+5. Ajoutez des événements/streams à votre planning
+6. Exportez votre planning en image PNG
+
+## 🗂️ Structure du projet
+
+```
+twitch_planner/
+├── backend/
+│   ├── prisma/
+│   │   └── schema.prisma          # Schéma de la base de données
+│   ├── src/
+│   │   ├── controllers/           # Logique métier
+│   │   ├── middlewares/           # Middlewares (auth, etc.)
+│   │   ├── routes/                # Routes de l'API
+│   │   └── utils/                 # Utilitaires (validation, JWT)
+│   ├── server.js                  # Point d'entrée du serveur
+│   ├── .env                       # Variables d'environnement (à créer)
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/            # Composants React
+│   │   ├── context/               # Context API (AuthContext)
+│   │   ├── pages/                 # Pages de l'application
+│   │   ├── utils/                 # Utilitaires (axios config)
+│   │   ├── App.jsx                # Composant principal
+│   │   └── main.jsx               # Point d'entrée
+│   └── package.json
+│
+├── docker-compose.yml             # Configuration Docker
+├── .env                           # Variables d'environnement (à créer)
+├── .env.example                   # Exemple de variables d'environnement
+├── .gitignore                     # Fichiers à ignorer par Git
+└── README.md
+```
+
+## 📦 Technologies utilisées
+
+### Backend
+- **Node.js** + **Express** : Serveur backend
+- **Prisma** : ORM pour PostgreSQL
+- **PostgreSQL** : Base de données relationnelle
+- **JWT** : Authentification
+- **bcrypt** : Hashage des mots de passe
+
+### Frontend
+- **React** + **Vite** : Framework frontend
+- **React Router** : Navigation
+- **Axios** : Requêtes HTTP
+- **Tailwind CSS** : Styling
+- **html2canvas** : Export PNG
+
+## 🔧 Commandes utiles
+
+### Backend
+
+```bash
+# Démarrer le serveur
+npm run dev
+
+# Voir la base de données avec Prisma Studio
+npx prisma studio
+
+# Réinitialiser la base de données
+npx prisma db push --force-reset
+
+# Générer le client Prisma (après modification du schema)
+npx prisma generate
+```
+
+### Frontend
+
+```bash
+# Démarrer le serveur de développement
+npm run dev
+
+# Build pour la production
+npm run build
+
+# Prévisualiser le build de production
+npm run preview
+```
+
+### Docker (PostgreSQL)
+
+```bash
+# Démarrer la base de données
+docker-compose up -d
+
+# Arrêter la base de données
+docker-compose down
+
+# Voir les logs
+docker-compose logs postgres
+
+# Suivre les logs en temps réel
+docker-compose logs -f postgres
+
+# Voir le statut
+docker-compose ps
+
+# Supprimer les données (⚠️ destructif)
+docker-compose down -v
+```
+
+## 🐛 Résolution de problèmes
+
+### Le backend ne démarre pas
+
+**Erreur : `Cannot connect to database`**
+- Vérifiez que Docker Desktop est démarré
+- Vérifiez que PostgreSQL tourne : `docker-compose ps`
+- Vérifiez que le mot de passe dans `.env` correspond
+
+**Erreur : `Prisma Client not generated`**
+```bash
+npx prisma generate
+```
+
+### Le frontend ne se connecte pas au backend
+
+**Erreur : `Network Error` ou `CORS`**
+- Vérifiez que le backend tourne sur le port 5000
+- Vérifiez l'URL dans `frontend/src/utils/axios.js`
+
+### Erreur lors de la création d'événements
+
+**Erreur : `404 Not Found`**
+- Vérifiez que dans `server.js` la route est bien `/api/events` (avec un S)
+
+### Le container Docker ne démarre pas
+
+**Erreur : `port is already allocated`**
+- Un autre service utilise le port 5433
+- Changez le port dans `docker-compose.yml` ET dans `.env`
+
+Dans `docker-compose.yml` :
+```yaml
+ports:
+  - "5434:5432"  # Changez 5433 en 5434
+```
+
+Dans `.env` :
+```env
+DATABASE_URL="postgresql://postgres:VOTRE_MDP@localhost:5434/twitchplanner"
+```
+
+## 📝 Fonctionnalités
+
+- ✅ Authentification (inscription, connexion, déconnexion)
+- ✅ Gestion du profil (email, mot de passe, URL Twitch, logo)
+- ✅ Création de plannings avec dates de début et fin
+- ✅ Ajout d'événements/streams avec :
+  - Nom du jeu
+  - Image du jeu
+  - Titre du stream (optionnel)
+  - Jour de la semaine
+  - Heure de début et fin
+- ✅ Vue calendrier hebdomadaire avec affichage dynamique des jours
+- ✅ Modification et suppression d'événements
+- ✅ Export du planning en image PNG
+- ✅ Interface responsive
+
+## 👨‍💻 Auteur
+
+Laura IRISKINIAN - Projet B3 Keyce Academy 2025/2026
+
+## 📄 Licence
+
+Ce projet est réalisé dans le cadre d'un projet académique.

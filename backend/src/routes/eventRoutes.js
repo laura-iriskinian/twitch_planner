@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get('/planning/:planningId', authenticate, getEventsByPlanning);
 router.post('/planning/:planningId', authenticate, createEvent);
-router.put('/:id', authenticate, updateEvent);
+router.put('/:eventId', authenticate, updateEvent);
 router.delete('/:id', authenticate, deleteEvent);
 
 module.exports = router;

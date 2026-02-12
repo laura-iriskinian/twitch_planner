@@ -28,7 +28,7 @@ const eventRoutes = require('./src/routes/eventRoutes');
 app.use('/api/profile', profileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/plannings', planningRoutes);
-app.use('/api/event', eventRoutes);
+app.use('/api/events', eventRoutes);
 
 //Route de test
 app.get('/api/health', (req, res) => {

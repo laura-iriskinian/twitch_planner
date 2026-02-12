@@ -9,7 +9,8 @@ import Dashboard from './pages/Dashboard';
 import CreatePlanning from './pages/CreatePlanning';
 import ViewPlanning from './pages/ViewPlanning';
 import Profile from './pages/Profile';
-import AddEvent from './pages/addEvent';  
+import AddEvent from './pages/addEvent'; 
+import EditPlanning from './pages/EditPlanning';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -109,6 +110,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/plannings/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditPlanning/>
+            </ProtectedRoute>
+          }
+          />
 
         <Route path="*" element={<div className="text-center text-2xl">Page non trouvée</div>} />
       </Routes>

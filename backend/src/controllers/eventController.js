@@ -62,38 +62,46 @@ const createEvent = async (req, res) => {
 
         if (!gameName) {
             return res.status(400).json({ message: 'Le nom du jeu est requis' });   
-            }
+        }
 
         if (!dayOfWeek) {
             return res.status(400).json({ message: 'Le jour de la semaine est requis' });
         }
 
-        if (startTime) {
+        if (!startTime) {
             return res.status(400).json({ message: 'L\'heure de début est requise' });
         }
 
-        if (endTime <= startTime) {
+        if (!isValidTime(startTime)) {
+            return res.status(400).json({ message: 'L\'heure de début doit être au format HH:mm' });
+        }
+
+        if (endTime && !isValidTime(endTime)) {
+            return res.status(400).json({ message: 'L\'heure de fin doit être au format HH:mm' });
+        }
+
+        if (endTime && endTime <= startTime) {
             return res.status(400).json({ message: 'L\'heure de fin doit être supérieure à l\'heure de début' });
         }
 
-        if (!gameImage.startsWith('data:image/')) {
+        if (gameImage && !gameImage.startsWith('data:image/')) {
             return res.status(400).json({ message: 'L\'image du jeu doit être au format base64' });
         }
 
         const event = await prisma.event.create({
             data: {
                 gameName,
-                gameImage,
+                gameImage: gameImage || null, 
                 streamTitle: streamTitle || null,
                 dayOfWeek,
                 startTime,
-                endTime,
+                endTime: endTime || null, 
                 planningId
             }
         });
 
         res.status(201).json({ message: 'Événement créé avec succès', event });
-} catch (error) {
+    } catch (error) {
         console.error('Erreur lors de la création de l\'événement:', error);
         res.status(500).json({ message: 'Erreur serveur' });
     }
@@ -131,7 +139,7 @@ const updateEvent = async (req, res) => {
 
         if (gameImage !== undefined) {
             if (gameImage && !gameImage.startsWith('data:image/')) {
-                return res.status(400).json({ error: 'L\'image doit être au format base64' });
+                return res.status(400).json({ message: 'L\'image du jeu doit être au format base64' });
             }
             updateData.gameImage = gameImage || null;
         }
@@ -150,8 +158,15 @@ const updateEvent = async (req, res) => {
             updateData.startTime = startTime;
         }
 
+        if (endTime !== undefined) {
+            if (endTime && !isValidTime(endTime)) {
+                return res.status(400).json({ message: 'L\'heure de fin doit être au format HH:mm' });
+            }
+            updateData.endTime = endTime || null;
+        }
+
         const finalStartTime = updateData.startTime || existingEvent.startTime;
-        const finalEndTime = endTime !== undefined ? endTime : existingEvent.endTime;
+        const finalEndTime = updateData.endTime !== undefined ? updateData.endTime : existingEvent.endTime;
 
         if (finalEndTime && finalEndTime <= finalStartTime) {
             return res.status(400).json({ message: 'L\'heure de fin doit être supérieure à l\'heure de début' });
@@ -173,7 +188,7 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
     try {
         const userId = req.user.id;
-        const eventId = parseInt(req.params.eventId);
+        const eventId = parseInt(req.params.id);
 
         const event = await prisma.event.findUnique({
             where: { id: eventId },

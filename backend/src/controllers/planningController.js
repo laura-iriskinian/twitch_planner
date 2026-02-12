@@ -30,8 +30,8 @@ const getAllPlannings = async (req, res) => {
             include: {
                 events: {
                     orderBy: [
-                        { startTime: 'asc' },
-                        { createdAt: 'asc' }
+                        { dayOfWeek: 'asc' },
+                        { startTime: 'asc' }
                     ]
                 }
             }
@@ -79,10 +79,10 @@ const createPlanning = async (req, res) => {
                 events:true
             }
         });
-    } catch (error) {
-        console.error('Erreur createPlanning', error);
-        res.status(500).json({ message: 'Erreur serveur' });
-    }
+        res.status(201).json({message: 'Planning créé avec succès', planning });
+        } catch (error) {
+            console.error('Erreur createPlanning', error);
+            res.status(500).json({ message: 'Erreur serveur' });    }
     };
 
     const updatePlanning = async (req, res) => {
