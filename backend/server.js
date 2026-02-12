@@ -27,7 +27,7 @@ const eventRoutes = require('./src/routes/eventRoutes');
 
 app.use('/api/profile', profileRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/planning', planningRoutes);
+app.use('/api/plannings', planningRoutes);
 app.use('/api/event', eventRoutes);
 
 //Route de test

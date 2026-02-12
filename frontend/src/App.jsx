@@ -2,12 +2,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 
-// Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import CreatePlanning from './pages/CreatePlanning';
+import ViewPlanning from './pages/ViewPlanning';
+import Profile from './pages/Profile';
+import AddEvent from './pages/addEvent';  
 
-// Composant pour protéger les routes
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -26,7 +29,6 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Composant pour rediriger si déjà connecté
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -49,7 +51,6 @@ function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        {/* Routes publiques */}
         <Route path="/" element={<Home />} />
         <Route
           path="/login"
@@ -68,29 +69,47 @@ function AppRoutes() {
           }
         />
 
-        {/* Routes protégées (à créer) */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold">Dashboard (à créer)</h1>
-              </div>
+                <Dashboard />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/plannings/create"
+            element={
+              <ProtectedRoute>
+                <CreatePlanning />
+              </ProtectedRoute>
+            }
+        />
+        <Route
+          path="/plannings/:id"
+            element={
+              <ProtectedRoute>
+                <ViewPlanning />
+              </ProtectedRoute>
+            }
         />
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold">Profil (à créer)</h1>
-              </div>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/plannings/:id/add-event"
+          element={
+            <ProtectedRoute>
+              <AddEvent />
             </ProtectedRoute>
           }
         />
 
-        {/* 404 */}
         <Route path="*" element={<div className="text-center text-2xl">Page non trouvée</div>} />
       </Routes>
     </Layout>
